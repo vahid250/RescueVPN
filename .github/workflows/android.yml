@@ -10,12 +10,8 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Generate Wrapper if Missing
-        run: |
-          if [ ! -f "gradlew" ]; then
-            gradle wrapper
-          fi
-          chmod +x gradlew
+      - name: Grant permissions
+        run: chmod +x gradlew || gradle wrapper && chmod +x gradlew
       - name: Assemble Debug APK
         run: ./gradlew assembleDebug --no-daemon --stacktrace || gradle assembleDebug --no-daemon --stacktrace
       - name: Direct Publish APK Artifact
