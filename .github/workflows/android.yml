@@ -1,36 +1,38 @@
 name: Android CI Build
+
 on:
   push:
     branches: [ "main", "master" ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
-    name: Build & Assemble Debug APK
+    name: Build & Publish APK
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Source Code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Java JDK 17
+      - name: Setup Java 17 (No Cache)
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
           java-version: '17'
-          cache: 'gradle'
+          distribution: 'temurin'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: '8.2'
+      - name: Grant Executable Permission
+        run: chmod +x gradlew || (gradle wrapper && chmod +x gradlew)
 
-      - name: Build Debug APK
-        run: gradle assembleDebug --no-daemon --stacktrace
+      - name: Assemble Debug APK
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: Upload Debug APK Artifact
+      - name: Direct Publish APK Artifact
         uses: actions/upload-artifact@v4
-        if: always()
         with:
-          name: RescueVPN-Debug-Build
+          name: RescueVPN-Final-APK
           path: app/build/outputs/apk/debug/*.apk
           retention-days: 14
+          if-no-files-found: error
