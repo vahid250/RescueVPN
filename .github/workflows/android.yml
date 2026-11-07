@@ -1,4 +1,5 @@
 name: Android CI Build
+
 on:
   push:
     branches: [ "main", "master" ]
@@ -8,6 +9,7 @@ jobs:
   build:
     name: Build & Assemble Debug APK
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
