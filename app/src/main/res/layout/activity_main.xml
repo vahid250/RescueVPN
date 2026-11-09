@@ -32,8 +32,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/tvTitle"
         android:layout_marginTop="8dp"
-        android:text="@string/status_disconnected"
-        android:textColor="#BBCABF"
+        android:text="@string/status_disconn"
+        android:textColor="#BBCAAF"
         android:textSize="14sp" />
 
     <ImageButton
@@ -43,6 +43,6 @@
         android:layout_centerInParent="true"
         android:background="@android:drawable/btn_default"
         android:src="@android:drawable/ic_lock_power_off"
-        android:contentDescription="Power Trigger" />
+        android:contentDescription="Power Toggle" />
 
 </RelativeLayout>

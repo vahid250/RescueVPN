@@ -24,13 +24,13 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 isConnected = !isConnected;
                 if (isConnected) {
-                    tvStatus.setText(R.string.status_connected);
-                    tvStatus.setTextColor(0xFF4EDEA3);
-                    Toast.makeText(MainActivity.this, "تونل امن هوشمند متصل شد", Toast.LENGTH_SHORT).show();
+                    tvStatus.setText(R.string.status_conn);
+                    tvStatus.setTextColor(0xFF10B981);
+                    Toast.makeText(MainActivity.this, "Connected", Toast.LENGTH_SHORT).show();
                 } else {
-                    tvStatus.setText(R.string.status_disconnected);
-                    tvStatus.setTextColor(0xFFBBCABF);
-                    Toast.makeText(MainActivity.this, "اتصال قطع گردید", Toast.LENGTH_SHORT).show();
+                    tvStatus.setText(R.string.status_disconn);
+                    tvStatus.setTextColor(0xFFEF4444);
+                    Toast.makeText(MainActivity.this, "Disconnected", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -38,7 +38,7 @@ public class MainActivity extends Activity {
         btnSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "تنظیمات پیشرفته Rescue AI", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Settings", Toast.LENGTH_SHORT).show();
             }
         });
     }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Rescue VPN AI</string>
-    <string name="btn_connect">اتصال امن</string>
-    <string name="status_connected">متصل - تونل هوشمند فعال</string>
-    <string name="status_disconnected">قطع - در انتظار کاربر</string>
+    <string name="app_name">Rescue VPN</string>
+    <string name="engine_status">RescueVPN Engine Ready &amp; Shielded</string>
+    <string name="status_disconn">OFF</string>
+    <string name="status_conn">ON (Connected)</string>
 </resources>
