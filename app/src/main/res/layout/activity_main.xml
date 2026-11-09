@@ -1,17 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical"
     android:background="#0F131D"
-    android:padding="24dp">
-    <TextView
+    android:padding="20dp">
+
+    <RelativeLayout
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true">
+
+        <TextView
+            android:id="@+id/tvAppName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:text="Rescue VPN AI"
+            android:textColor="#DFE2F1"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/btnSettings"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_manage"
+            android:tint="#4EDEA3"
+            android:contentDescription="Settings" />
+    </RelativeLayout>
+
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/engine_status"
-        android:textColor="#4EDEA3"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:gravity="center" />
-</LinearLayout>
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:id="@+id/powerContainer"
+            android:layout_width="160dp"
+            android:layout_height="160dp"
+            android:background="@android:drawable/screen_background_dark_transparent">
+
+            <ImageButton
+                android:id="@+id/btnPowerToggle"
+                android:layout_width="130dp"
+                android:layout_height="130dp"
+                android:layout_gravity="center"
+                android:background="@android:drawable/dialog_holo_dark_frame"
+                android:src="@android:drawable/ic_lock_power_off"
+                android:tint="#4EDEA3"
+                android:contentDescription="Power Button" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="OFF (غیرفعال)"
+            android:textColor="#4EDEA3"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvHint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="برای برقراری تونل امن لمس کنید"
+            android:textColor="#86948A"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+</RelativeLayout>
