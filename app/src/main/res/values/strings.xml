@@ -1,9 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name">Rescue VPN</string>
-    <string name="status_ready">آماده اتصال امن</string>
-    <string name="status_connected">متصل به سرور نجات</string>
-    <string name="action_connect">اتصال</string>
-    <string name="action_disconnect">قطع اتصال</string>
-    <string name="settings_title">تنظیمات تونل</string>
-</resources>
+
+
+    Rescue VPN
+    RescueVPN Engine Ready & Shielded
+    Ready
+    Connected
+
