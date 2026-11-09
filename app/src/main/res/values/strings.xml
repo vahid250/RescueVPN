@@ -1,1 +1,5 @@
-<resources><string name="app_name">Rescue VPN</string></resources>
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Rescue VPN</string>
+    <string name="engine_status">RescueVPN Engine Ready &amp; Shielded</string>
+</resources>

@@ -9,7 +9,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="RescueVPN Engine Ready & Shielded"
+        android:text="@string/engine_status"
         android:textColor="#4EDEA3"
         android:textSize="20sp"
         android:textStyle="bold"
