@@ -1,8 +1,8 @@
-name: Build APK
+name: Build RescueVPN Clean
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
@@ -11,17 +11,22 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-      - name: Setup JDK 17
+
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Grant Execute Permission to Gradle
+
+      - name: Grant Execute Permission to Gradlew
         run: chmod +x gradlew || true
-      - name: Build with Gradle
-        run: ./gradlew assembleDebug
-      - name: Upload Universal APK
+
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: RescueVPN-Final-APK
+          name: RescueVPN-AI-Debug
           path: app/build/outputs/apk/debug/*.apk
+          retention-days: 14

@@ -1,33 +1,36 @@
 package com.rescuevpn;
+
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
     private boolean isConnected = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ImageButton btnPower = findViewById(R.id.btnPowerToggle);
-        ImageButton btnSettings = findViewById(R.id.btnSettings);
-        TextView tvState = findViewById(R.id.tvPowerState);
+
+        final ImageButton btnPower = findViewById(R.id.btnPower);
+        final ImageButton btnSettings = findViewById(R.id.btnSettings);
+        final TextView tvStatus = findViewById(R.id.tvStatus);
 
         btnPower.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 isConnected = !isConnected;
                 if (isConnected) {
-                    tvState.setText("ON (Connected)");
-                    tvState.setTextColor(0xFF10B981);
-                    Toast.makeText(MainActivity.this, "Connected", Toast.LENGTH_SHORT).show();
+                    tvStatus.setText(R.string.status_connected);
+                    tvStatus.setTextColor(0xFF4EDEA3);
+                    Toast.makeText(MainActivity.this, "تونل امن هوشمند متصل شد", Toast.LENGTH_SHORT).show();
                 } else {
-                    tvState.setText("OFF");
-                    tvState.setTextColor(0xFFEF4444);
-                    Toast.makeText(MainActivity.this, "Disconnected", Toast.LENGTH_SHORT).show();
+                    tvStatus.setText(R.string.status_disconnected);
+                    tvStatus.setTextColor(0xFFBBCABF);
+                    Toast.makeText(MainActivity.this, "اتصال قطع گردید", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -35,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         btnSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "Settings", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "تنظیمات پیشرفته Rescue AI", Toast.LENGTH_SHORT).show();
             }
         });
     }
