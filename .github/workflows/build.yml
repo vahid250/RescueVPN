@@ -1,24 +1,35 @@
-name: Android 100% Green CI
+name: Rescue Build Universal APK
 on:
-  push:
-    branches: [ "main", "master" ]
   workflow_dispatch:
+  push:
+    branches: [ "**" ]
 jobs:
   build:
-    name: Build & Publish APK
+    name: Build Android APK
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-      - name: Permission
-        run: chmod +x gradlew || true
-      - name: Compile Debug APK
+
+      - name: Grant Execute Permission
+        run: chmod +x gradlew
+
+      - name: Standardize Gradle Wrapper
+        run: |
+          sed -i 's|distributionUrl=.*|distributionUrl=https\\://services.gradle.org/distributions/gradle-8.2-bin.zip|' gradle/wrapper/gradle-wrapper.properties || true
+
+      - name: Compile APK (Clean No-Daemon)
         run: ./gradlew assembleDebug --no-daemon --stacktrace
+
       - name: Publish Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: RescueVPN-Final-APK
+          name: universal-rescue-debug-apk
           path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
