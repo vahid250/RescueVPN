@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Rescue VPN</string>
+    <string name="status_connected">Connected - Secure</string>
+    <string name="status_disconnected">Disconnected</string>
 </resources>
