@@ -1,8 +1,10 @@
 name: Rescue Build Universal APK
+
 on:
   workflow_dispatch:
   push:
     branches: [ "**" ]
+
 jobs:
   build:
     name: Build Android APK
@@ -17,17 +19,18 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.4'
+
       - name: Grant Execute Permission
-        run: chmod +x gradlew
+        run: chmod +x gradlew || true
 
-      - name: Standardize Gradle Wrapper
-        run: |
-          sed -i 's|distributionUrl=.*|distributionUrl=https\\://services.gradle.org/distributions/gradle-8.2-bin.zip|' gradle/wrapper/gradle-wrapper.properties || true
+      - name: Clean & Assemble Debug APK
+        run: ./gradlew clean assembleDebug --no-daemon --no-build-cache --stacktrace
 
-      - name: Compile APK (Clean No-Daemon)
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
-
-      - name: Publish Artifact
+      - name: Publish Universal APK
         uses: actions/upload-artifact@v4
         with:
           name: universal-rescue-debug-apk
