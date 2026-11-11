@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
+import android.text.method.PasswordTransformationMethod;
 import android.view.Gravity;
 import android.widget.Button;
 import android.widget.EditText;
@@ -65,6 +66,7 @@ public class ConfigGeneratorActivity extends Activity {
         allowedIpsInput = addField(layout, "AllowedIPs", "0.0.0.0/0, ::/0", InputType.TYPE_CLASS_TEXT);
         keepaliveInput = addField(layout, "PersistentKeepalive برحسب ثانیه (اختیاری)", "25", InputType.TYPE_CLASS_NUMBER);
         presharedKeyInput = addField(layout, "PreSharedKey (اختیاری)", "در صورت نیاز وارد کنید", InputType.TYPE_CLASS_TEXT);
+        presharedKeyInput.setTransformationMethod(PasswordTransformationMethod.getInstance());
 
         Button generateButton = new Button(this);
         generateButton.setText("ساخت کلید و آماده‌سازی کانفیگ");
