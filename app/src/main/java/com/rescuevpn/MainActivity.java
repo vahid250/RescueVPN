@@ -30,6 +30,7 @@ public class MainActivity extends Activity {
     private TextView statusText;
     private Button connectBtn;
     private Button chooseBtn;
+    private Button generatorBtn;
     private GradientDrawable connectShape;
     private boolean isConnected = false;
     private boolean isBusy = false;
@@ -67,7 +68,7 @@ public class MainActivity extends Activity {
         layout.setPadding(40, 40, 40, 40);
 
         TextView title = new TextView(this);
-        title.setText("Rescue VPN");
+        title.setText("R&MA");
         title.setTextSize(26);
         title.setTextColor(Color.parseColor("#DFE2F1"));
         title.setTypeface(Typeface.DEFAULT_BOLD);
@@ -75,7 +76,7 @@ public class MainActivity extends Activity {
         layout.addView(title);
 
         TextView subtitle = new TextView(this);
-        subtitle.setText("WireGuard Censorship Bypass Engine");
+        subtitle.setText("WireGuard VPN Client");
         subtitle.setTextSize(12);
         subtitle.setTextColor(Color.parseColor("#BBCAAF"));
         subtitle.setGravity(Gravity.CENTER);
@@ -94,6 +95,12 @@ public class MainActivity extends Activity {
         chooseBtn.setText("انتخاب فایل کانفیگ");
         layout.addView(chooseBtn);
         chooseBtn.setOnClickListener(v -> chooseConfig());
+
+        generatorBtn = new Button(this);
+        generatorBtn.setText("تولید کانفیگ WireGuard");
+        layout.addView(generatorBtn);
+        generatorBtn.setOnClickListener(v ->
+                startActivity(new Intent(this, ConfigGeneratorActivity.class)));
 
         connectBtn = new Button(this);
         connectBtn.setText("اتصال امن");
@@ -257,6 +264,7 @@ public class MainActivity extends Activity {
         statusText.setText(message);
         connectBtn.setEnabled(!busy);
         chooseBtn.setEnabled(!busy && !isConnected);
+        generatorBtn.setEnabled(!busy && !isConnected);
     }
 
     private void updateUi(String message, String color) {
@@ -264,6 +272,7 @@ public class MainActivity extends Activity {
         connectBtn.setText(isConnected ? "قطع اتصال" : "اتصال امن");
         connectShape.setColor(Color.parseColor(color));
         chooseBtn.setEnabled(!isConnected && !isBusy);
+        generatorBtn.setEnabled(!isConnected && !isBusy);
     }
 
     @Override
