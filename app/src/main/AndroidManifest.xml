@@ -4,9 +4,12 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <application
         android:allowBackup="true"
-        android:label="Rescue VPN"
+        android:label="R&amp;MA"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        <activity
+            android:name=".ConfigGeneratorActivity"
+            android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true">

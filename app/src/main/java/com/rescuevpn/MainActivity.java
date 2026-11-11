@@ -123,7 +123,9 @@ public class MainActivity extends Activity {
         });
 
         layout.addView(connectBtn);
-        setContentView(layout);
+        android.widget.ScrollView scroll = new android.widget.ScrollView(this);
+        scroll.addView(layout);
+        setContentView(scroll);
     }
 
     private void chooseConfig() {
