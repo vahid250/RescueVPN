@@ -17,11 +17,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.wireguard.config.Config;
+import com.wireguard.crypto.Key;
 import com.wireguard.crypto.KeyPair;
 
 import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 
 public class ConfigGeneratorActivity extends Activity {
     private static final int REQUEST_SAVE_CONFIG = 4101;
@@ -54,15 +56,15 @@ public class ConfigGeneratorActivity extends Activity {
         layout.addView(heading);
 
         TextView notice = new TextView(this);
-        notice.setText("این ابزار یک کلید خصوصی تازه روی همین گوشی می‌سازد. برای اتصال، کلید عمومی را باید در سمت سرور ثبت کنید. فایل خروجی شامل کلید خصوصی است؛ آن را محرمانه نگه دارید. این ابزار فقط کانفیگ استاندارد WireGuard/UDP تولید می‌کند.");
+        notice.setText("این ابزار فقط فایل کانفیگ می‌سازد و خودش سرور VPN یا اشتراک اینترنت ایجاد نمی‌کند. برای اتصال واقعی باید اطلاعات یک سرور فعال را از ارائه‌دهنده خود بگیرید و کلید عمومی این دستگاه را در سمت سرور ثبت کنید. vpn.example.com یک آدرس نمونه و غیرواقعی است. فایل خروجی شامل کلید خصوصی است؛ آن را محرمانه نگه دارید. این ابزار فقط WireGuard استاندارد/UDP را پشتیبانی می‌کند.");
         notice.setTextSize(14);
         notice.setPadding(0, 16, 0, 20);
         layout.addView(notice);
 
-        endpointInput = addField(layout, "آدرس سرور (دامنه یا IP به‌همراه پورت)", "vpn.example.com:51820", InputType.TYPE_CLASS_TEXT);
-        serverPublicKeyInput = addField(layout, "کلید عمومی سرور", "کلید عمومی سرور را وارد کنید", InputType.TYPE_CLASS_TEXT);
+        endpointInput = addField(layout, "آدرس واقعی سرور (دامنه یا IP به‌همراه پورت)", "نمونه غیرواقعی: vpn.example.com:51820", InputType.TYPE_CLASS_TEXT);
+        serverPublicKeyInput = addField(layout, "کلید عمومی واقعی سرور", "کلید عمومی ۴۴ کاراکتری سرور", InputType.TYPE_CLASS_TEXT);
         addressInput = addField(layout, "آدرس تونل این دستگاه (CIDR)", "10.7.0.2/32", InputType.TYPE_CLASS_TEXT);
-        dnsInput = addField(layout, "DNS (اختیاری)", "مثلاً 1.1.1.1", InputType.TYPE_CLASS_TEXT);
+        dnsInput = addField(layout, "DNS (اختیاری)", "مثلاً 1.1.1.1؛ فقط نمونه", InputType.TYPE_CLASS_TEXT);
         allowedIpsInput = addField(layout, "AllowedIPs", "0.0.0.0/0, ::/0", InputType.TYPE_CLASS_TEXT);
         keepaliveInput = addField(layout, "PersistentKeepalive برحسب ثانیه (اختیاری)", "25", InputType.TYPE_CLASS_NUMBER);
         presharedKeyInput = addField(layout, "PreSharedKey (اختیاری)", "در صورت نیاز وارد کنید", InputType.TYPE_CLASS_TEXT);
@@ -127,6 +129,20 @@ public class ConfigGeneratorActivity extends Activity {
             showError("آدرس سرور باید به شکل host:port یا IP:port باشد.");
             return;
         }
+        if (endpoint.toLowerCase(Locale.ROOT).contains("example.")) {
+            showError("vpn.example.com فقط نمونه است. آدرس واقعی سرور را از ارائه‌دهنده VPN بگیرید.");
+            return;
+        }
+        try {
+            int port = Integer.parseInt(endpoint.substring(endpoint.lastIndexOf(':') + 1));
+            if (port < 1 || port > 65535) {
+                showError("شماره پورت باید بین 1 تا 65535 باشد.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            showError("شماره پورت معتبر نیست.");
+            return;
+        }
         if (keepalive.isEmpty()) keepalive = "25";
         try {
             int seconds = Integer.parseInt(keepalive);
@@ -141,6 +157,10 @@ public class ConfigGeneratorActivity extends Activity {
         if (allowedIps.isEmpty()) allowedIps = "0.0.0.0/0, ::/0";
 
         try {
+            Key.fromBase64(serverKey);
+            if (!presharedKey.isEmpty()) {
+                Key.fromBase64(presharedKey);
+            }
             KeyPair keyPair = new KeyPair();
             generatedPublicKey = keyPair.getPublicKey().toBase64();
 

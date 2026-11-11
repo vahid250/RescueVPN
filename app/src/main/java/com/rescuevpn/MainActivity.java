@@ -7,6 +7,8 @@ import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Gravity;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -14,8 +16,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.wireguard.android.backend.GoBackend;
+import com.wireguard.android.backend.Statistics;
 import com.wireguard.android.backend.Tunnel;
 import com.wireguard.config.Config;
+import com.wireguard.crypto.Key;
 
 import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
@@ -28,6 +32,7 @@ public class MainActivity extends Activity {
     private GoBackend backend;
     private Config selectedConfig;
     private TextView statusText;
+    private TextView diagnosticsText;
     private Button connectBtn;
     private Button chooseBtn;
     private Button generatorBtn;
@@ -36,6 +41,35 @@ public class MainActivity extends Activity {
     private boolean isBusy = false;
     private final ExecutorService executor =
             Executors.newSingleThreadExecutor();
+    private final Handler diagnosticsHandler = new Handler(Looper.getMainLooper());
+    private boolean diagnosticsBusy = false;
+    private final Runnable diagnosticsTask = new Runnable() {
+        @Override
+        public void run() {
+            if (!isConnected || backend == null || isFinishing()) return;
+            if (diagnosticsBusy) {
+                diagnosticsHandler.postDelayed(this, 1000);
+                return;
+            }
+            diagnosticsBusy = true;
+            executor.execute(() -> {
+                String report;
+                try {
+                    report = collectDiagnostics();
+                } catch (Exception | LinkageError e) {
+                    report = "آمار ارتباط فعلاً در دسترس نیست.";
+                }
+                final String result = report;
+                runOnUiThread(() -> {
+                    diagnosticsBusy = false;
+                    if (isConnected && diagnosticsText != null) {
+                        diagnosticsText.setText(result);
+                        diagnosticsHandler.postDelayed(diagnosticsTask, 2000);
+                    }
+                });
+            });
+        }
+    };
 
     private final Tunnel tunnel = new Tunnel() {
         @Override
@@ -48,10 +82,15 @@ public class MainActivity extends Activity {
             runOnUiThread(() -> {
                 if (newState == State.UP) {
                     isConnected = true;
-                    updateUi("متصل به VPN", "#10B981");
+                    updateUi("تونل VPN فعال است", "#10B981");
+                    startDiagnostics();
                 } else if (newState == State.DOWN) {
                     isConnected = false;
-                    updateUi("اتصال برقرار نیست", "#4EDEA3");
+                    stopDiagnostics();
+                    updateUi("تونل VPN خاموش است", "#4EDEA3");
+                    if (diagnosticsText != null) {
+                        diagnosticsText.setText("برای بررسی ارتباط، ابتدا VPN را روشن کنید.");
+                    }
                 }
             });
         }
@@ -88,8 +127,16 @@ public class MainActivity extends Activity {
         statusText.setTextSize(15);
         statusText.setTextColor(Color.WHITE);
         statusText.setGravity(Gravity.CENTER);
-        statusText.setPadding(0, 16, 0, 24);
+        statusText.setPadding(0, 16, 0, 12);
         layout.addView(statusText);
+
+        diagnosticsText = new TextView(this);
+        diagnosticsText.setText("پس از روشن‌شدن VPN، وضعیت واقعی ارتباط با سرور و آمار ترافیک نمایش داده می‌شود.");
+        diagnosticsText.setTextSize(13);
+        diagnosticsText.setTextColor(Color.parseColor("#BBCAAF"));
+        diagnosticsText.setGravity(Gravity.CENTER);
+        diagnosticsText.setPadding(8, 8, 8, 24);
+        layout.addView(diagnosticsText);
 
         chooseBtn = new Button(this);
         chooseBtn.setText("انتخاب فایل کانفیگ");
@@ -209,18 +256,21 @@ public class MainActivity extends Activity {
 
                 runOnUiThread(() -> {
                     setBusy(false, connected
-                            ? "اتصال VPN برقرار شد"
-                            : "اتصال برقرار نشد");
+                            ? "تونل VPN فعال شد؛ وضعیت سرور را در آمار ببینید"
+                            : "تونل VPN فعال نشد");
                     if (connected) {
                         isConnected = true;
-                        updateUi("متصل به VPN", "#10B981");
+                        updateUi("تونل VPN فعال است", "#10B981");
+                        startDiagnostics();
                     } else {
                         isConnected = false;
+                        stopDiagnostics();
                     }
                 });
             } catch (Exception | LinkageError e) {
                 runOnUiThread(() -> {
                     isConnected = false;
+                    stopDiagnostics();
                     setBusy(false, "اتصال ناموفق بود");
                     Toast.makeText(this,
                             "راه‌اندازی WireGuard ناموفق بود",
@@ -246,7 +296,9 @@ public class MainActivity extends Activity {
                             : "وضعیت قطع اتصال تأیید نشد");
                     if (disconnected) {
                         isConnected = false;
-                        updateUi("اتصال برقرار نیست", "#4EDEA3");
+                        stopDiagnostics();
+                        updateUi("تونل VPN خاموش است", "#4EDEA3");
+                        diagnosticsText.setText("برای بررسی ارتباط، ابتدا VPN را روشن کنید.");
                     }
                 });
             } catch (Exception | LinkageError e) {
@@ -257,6 +309,64 @@ public class MainActivity extends Activity {
                 });
             }
         });
+    }
+
+    private void startDiagnostics() {
+        diagnosticsHandler.removeCallbacks(diagnosticsTask);
+        diagnosticsText.setText("در حال دریافت آمار تونل و بررسی Handshake...");
+        diagnosticsHandler.post(diagnosticsTask);
+    }
+
+    private void stopDiagnostics() {
+        diagnosticsHandler.removeCallbacks(diagnosticsTask);
+        diagnosticsBusy = false;
+    }
+
+    private String collectDiagnostics() {
+        if (backend == null) return "موتور VPN آماده نیست.";
+        Statistics stats = backend.getStatistics(tunnel);
+        long tx = stats.totalTx();
+        long rx = stats.totalRx();
+        long latestHandshake = 0;
+        for (Key peerKey : stats.peers()) {
+            Statistics.PeerStats peerStats = stats.peer(peerKey);
+            if (peerStats != null) {
+                latestHandshake = Math.max(
+                        latestHandshake, peerStats.latestHandshakeEpochMillis());
+            }
+        }
+
+        String traffic = "ارسال: " + formatBytes(tx) + " | دریافت: " + formatBytes(rx);
+        if (latestHandshake <= 0) {
+            return "تونل روشن است، اما هنوز Handshake از سرور دریافت نشده است.\n"
+                    + traffic + "\nاین وضعیت به معنی اتصال موفق به اینترنت نیست.";
+        }
+
+        long ageSeconds = Math.max(0, (System.currentTimeMillis() - latestHandshake) / 1000);
+        String age;
+        if (ageSeconds < 60) {
+            age = ageSeconds + " ثانیه قبل";
+        } else if (ageSeconds < 3600) {
+            age = (ageSeconds / 60) + " دقیقه قبل";
+        } else {
+            age = (ageSeconds / 3600) + " ساعت قبل";
+        }
+        String handshakeStatus = ageSeconds > 180
+                ? "آخرین Handshake قدیمی است: " + age
+                : "آخرین Handshake: " + age;
+        if (rx == 0) {
+            return handshakeStatus + "\n" + traffic
+                    + "\nPeer پاسخ داده، اما هنوز داده‌ای از سرور دریافت نشده؛ دسترسی اینترنت تأیید نشده است.";
+        }
+        return handshakeStatus + "\n" + traffic
+                + "\nداده از سرور دریافت شده است؛ اگر سایت باز نمی‌شود، DNS یا مسیرهای AllowedIPs باید بررسی شوند.";
+    }
+
+    private String formatBytes(long bytes) {
+        if (bytes < 1024) return bytes + " B";
+        if (bytes < 1024L * 1024L) return String.format(java.util.Locale.US, "%.1f KB", bytes / 1024.0);
+        if (bytes < 1024L * 1024L * 1024L) return String.format(java.util.Locale.US, "%.1f MB", bytes / (1024.0 * 1024.0));
+        return String.format(java.util.Locale.US, "%.2f GB", bytes / (1024.0 * 1024.0 * 1024.0));
     }
 
     private void setBusy(boolean busy, String message) {
@@ -277,6 +387,8 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        isConnected = false;
+        stopDiagnostics();
         super.onDestroy();
         executor.shutdown();
     }
